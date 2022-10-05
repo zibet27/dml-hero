@@ -1,73 +1,72 @@
 import { Context, END_B, literals, NEG, START_B } from ".";
 import { Statement } from "./statement";
-import { binaryCombinations } from "./utils";
+import { binaryCombinations, str } from "./utils";
 
-let mainColumnIndex = 0;
+type St = Statement | string;
 
-function drawHeader(st: Statement | string, row: HTMLElement, start = false) {
-    if (typeof st === 'string') {
-        const el = document.createElement('th');
-        el.textContent = st;
-        el.style.fontWeight = 'bold';
-        el.style.borderWidth = '3px';
-        row.appendChild(el);
-    } else {
-        if (st.connective === NEG && !st.right) {
-            const tmp = st.left;
-            st.left = st.right;
-            st.right = tmp;
+class TruthTable {
+    #row: Element;
+    mainColumnIndex = 0;
+    element: HTMLTableElement;
+
+    constructor(st: Statement) {
+        this.element = document.createElement('table');
+        const head = document.createElement('thead');
+        const body = document.createElement('tbody');
+        const headRow = document.createElement('tr');
+
+        const [combinations, indexes] = binaryCombinations([...literals]);
+        const context: Context = { combinations: [], indexes };
+
+        this.#row = headRow;
+        this.#drawHeader(st, true);
+
+        for (const c of combinations) {
+            this.#row = document.createElement('tr');
+            context.combinations = c;
+            this.#drawTh(st, context);
+            body.appendChild(this.#row);
         }
-        if (st.left) drawHeader(st.left, row);
-        if (st.brackets) {
-            const c = row.lastChild!;
-            c.textContent = START_B + c.textContent;
-        };
-        if (st.connective) drawHeader(st.connective, row);
-        if (start) mainColumnIndex = row.childElementCount - 1;
-        if (st.right) drawHeader(st.right, row);
-        if (st.brackets) {
-            row.lastChild!.textContent += END_B;
+
+        literals.clear();
+        head.appendChild(headRow);
+        this.element.append(head, body);
+    };
+
+    #drawHeader = (st: St, start = false) => {
+        if (typeof st === 'string') {
+            return this.#appendTh(st);
+        }
+        const startLen = this.#row.childElementCount;
+        if (st.left) this.#drawHeader(st.left);
+        if (st.connective) this.#drawHeader(st.connective);
+        if (start) this.mainColumnIndex = this.#row.childElementCount! - 1;
+        if (st.right) this.#drawHeader(st.right);
+        // add brackets to see the order of operations
+        if (st.connective && st.connective !== NEG && !start) {
+            const left = this.#row.childNodes[startLen];
+            left.textContent = START_B + left.textContent;
+            this.#row.lastChild!.textContent += END_B;
         };
     }
+
+    #appendTh = (statement: string | boolean) => {
+        const th = document.createElement('th');
+        th.textContent = typeof statement === 'boolean'
+            ? str(statement) : statement;
+        this.#row.appendChild(th);
+    }
+
+    #drawTh = (st: St, ctx: Context) => {
+        if (typeof st === 'string') {
+            this.#appendTh(ctx.combinations[ctx.indexes[st]]);
+            return;
+        }
+        if (st.left) this.#drawTh(st.left, ctx);
+        if (st.connective) this.#appendTh(st.calculate(ctx));
+        if (st.right) this.#drawTh(st.right, ctx);
+    }
+
 }
 
-function drawTh(st: Statement | string, ctx: Context, row: HTMLElement) {
-    if (typeof st === 'string') {
-        const el = document.createElement('th');
-        el.textContent = ctx.combinations[ctx.indexes[st]] ? '1' : '0';
-        row.appendChild(el);
-    } else {
-        if (st.left) drawTh(st.left, ctx, row);
-        if (st.connective) {
-            const el = document.createElement('th');
-            el.textContent = st.calculate(ctx) ? '1' : '0';
-            row.appendChild(el);
-        };
-        if (st.right) drawTh(st.right, ctx, row);
-    }
-}
-
-function createTable(st: Statement) {
-    const table = document.createElement('table');
-    // draw top
-    const topRow = document.createElement('thead');
-    drawHeader(st, topRow, true);
-    table.appendChild(topRow);
-    // move literals to statements
-    const [combinations, indexes] = binaryCombinations([...literals]);
-    const context: Context = { combinations: [], indexes };
-    for (const c of combinations) {
-        const row = document.createElement('tr');
-        context.combinations = c;
-        drawTh(st, context, row);
-        table.appendChild(row);
-    }
-    for (let i = 0; i < table.rows.length; i++) {
-        const c = table.rows[i].children.item(mainColumnIndex)! as HTMLTableColElement;
-        c.style.borderWidth = '3px';
-        c.style.borderRightWidth = '3px';
-    }
-    return table;
-}
-
-export { createTable };
+export { TruthTable };

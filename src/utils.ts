@@ -9,7 +9,7 @@ function searchEnd(text: string, start: number) {
             openedNewBrackets--;
         }
     }
-    console.log('No closing bracket');
+    console.log('No closing bracket', text);
     return text.length;
 }
 
@@ -32,8 +32,10 @@ function binaryCombinations(arr: string[]) {
     return [combinations, indexes] as const;
 }
 
+const str = (b: boolean) => b ? '1' : '0';
+
 function isLiteral(l: string) {
     return l.length === 1 && l.toUpperCase() === l && l.toLowerCase() !== l;
 }
 
-export { searchEnd, binaryCombinations, isLiteral };
+export { searchEnd, binaryCombinations, isLiteral, str };
