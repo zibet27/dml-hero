@@ -60,9 +60,8 @@ describe('Statement', () => {
 
     test('negation', () => {
         const st = new Statement(NEG + A);
-        expect(st.left instanceof Statement).toBe(true);
-        expect((st.left as Statement).right).toBe(A);
-        expect((st.left as Statement).connective).toBe(NEG);
+        expect(st.right).toBe(A);
+        expect(st.connective).toBe(NEG);
     });
 
     test('Pipe of conjunctions', () => {

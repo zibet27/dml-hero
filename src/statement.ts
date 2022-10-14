@@ -60,6 +60,9 @@ export class Statement {
             }
             i++;
         }
+        if (!this.left || !this.right) {
+            Object.assign(this, this.left || this.right);
+        }
         return i;
     }
 
