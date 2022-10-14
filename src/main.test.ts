@@ -107,8 +107,7 @@ function checkRow(row: Element, values: boolean[]) {
 describe('table', () => {
     test('Basic implication', () => {
         const op = operations[IMPL];
-        const st = new Statement(A + IMPL + B);
-        const table = new TruthTable(st).element;
+        const table = new TruthTable(A + IMPL + B).element;
         const rows = table.tBodies[0].rows;
         const [combinations, indexes] = binaryCombinations([A, B]);
 
@@ -123,8 +122,7 @@ describe('table', () => {
     });
 
     test('Negation', () => {
-        const st = new Statement(NEG + A);
-        const table = new TruthTable(st).element;
+        const table = new TruthTable(NEG + A).element;
         const rows = table.tBodies[0].rows;
         expect(table.tHead!.textContent).toBe(NEG + A);
         checkRow(rows.item(0)!, [false, true]);
@@ -136,8 +134,7 @@ describe('table', () => {
         const con = operations[CON];
         const dis = operations[DIS];
         const text = `${NEG}(${A}${CON}${B})${DIS}${NEG}${C}`;
-        const st = new Statement(text);
-        const table = new TruthTable(st).element;
+        const table = new TruthTable(text).element;
         const rows = table.tBodies[0].rows;
         const [combinations, indexes] = binaryCombinations([A, B, C]);        
 

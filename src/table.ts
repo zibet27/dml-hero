@@ -9,7 +9,8 @@ class TruthTable {
     mainColumnIndex = 0;
     element: HTMLTableElement;
 
-    constructor(st: Statement) {
+    constructor(statement: string) {
+        const st = new Statement(statement);
         this.element = document.createElement('table');
         const head = document.createElement('thead');
         const body = document.createElement('tbody');
